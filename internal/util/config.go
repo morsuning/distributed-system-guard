@@ -2,7 +2,6 @@ package util
 
 import (
 	"log"
-	"sync"
 
 	"github.com/spf13/viper"
 )
@@ -47,7 +46,6 @@ type GlobalConfig struct {
 }
 
 var GlobalConfigInstance *GlobalConfig
-var once sync.Once
 
 func ParseConfig(path string) error {
 	config := &Config{}
@@ -55,9 +53,13 @@ func ParseConfig(path string) error {
 	v.SetConfigFile(path)
 	if err := v.ReadInConfig(); err != nil {
 		log.Panicf("fatal error config file: %w", err)
+		return err
 	}
 	if err := v.Unmarshal(&config); err != nil {
 		log.Panicf("fatal error unmarshal config file: %w", err)
+		return err
 	}
+
+	return nil
 
 }
