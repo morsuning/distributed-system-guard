@@ -3,6 +3,8 @@ package util
 import (
 	"log"
 
+	clientv3 "go.etcd.io/etcd/client/v3"
+
 	"github.com/spf13/viper"
 )
 
@@ -22,7 +24,7 @@ type Config struct {
 }
 
 type vrrpInstances struct {
-	instances          []*vrrpInstance
+	Instances          []*vrrpInstance
 	etcdPoints, checks []string
 	dial, ttl          int
 }
@@ -31,12 +33,15 @@ type vrrpInstance struct {
 	priority           int
 	virtualIP, localIP string
 	// etcd leaseID
-	leaseID     int64
-	keepAliveCh <-chan *struct {
-		// warps the protobuf message leaseKeep AliveResponse
-	}
+	LeaseID     clientv3.LeaseID
+	KeepAliveCh <-chan *clientv3.LeaseKeepAliveResponse
 	// 标记leaseId和KeepAliveCh是否残留，register失败时会残留
-	haveResidualInfo bool
+	HaveResidualInfo bool
+}
+
+func (i vrrpInstance) GenerateKV() (string, string) {
+
+	return "", ""
 }
 
 type GlobalConfig struct {
@@ -47,19 +52,15 @@ type GlobalConfig struct {
 
 var GlobalConfigInstance *GlobalConfig
 
-func ParseConfig(path string) error {
+func ParseConfig(path string) {
 	config := &Config{}
 	v := viper.New()
 	v.SetConfigFile(path)
 	if err := v.ReadInConfig(); err != nil {
 		log.Panicf("fatal error config file: %w", err)
-		return err
 	}
 	if err := v.Unmarshal(&config); err != nil {
 		log.Panicf("fatal error unmarshal config file: %w", err)
-		return err
 	}
-
-	return nil
 
 }

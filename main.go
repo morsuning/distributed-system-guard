@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"log"
+
+	"split_brain_check/internal/util"
 )
 
 func main() {
@@ -20,7 +22,7 @@ func main() {
 	}
 
 	// 解析配置文件
-
+	util.ParseConfig(*configPath)
 }
 
 func NewService() {
