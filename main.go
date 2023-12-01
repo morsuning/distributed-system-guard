@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	"split_brain_check/internal/util"
+	"split_brain_check/internal/config"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	}
 
 	// 解析配置文件
-	util.ParseConfig(*configPath)
+	config.ParseConfig(*configPath)
 }
 
 func NewService() {
