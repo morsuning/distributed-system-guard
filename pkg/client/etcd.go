@@ -6,8 +6,10 @@ import (
 	"sync"
 	"time"
 
+	"split_brain_check/internal/config"
+	"split_brain_check/internal/util"
+
 	clientv3 "go.etcd.io/etcd/client/v3"
-	config "split_brain_check/internal/util"
 )
 
 type EtcdClient struct {
@@ -97,7 +99,7 @@ func (e *EtcdClient) startKeepalive(ctx context.Context) {
 			defer timer.Stop()
 			for {
 				select {
-				case <-notifyDown.ch:
+				case <-util.NotifyDown.Ch:
 					// 通知取消key续约，并删除key
 					log.Printf("notify cancel key lease[k:%s, v:%s]", k, v)
 					if err := e.unregister(ctx, index); err != nil {

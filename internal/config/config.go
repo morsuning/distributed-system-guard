@@ -1,11 +1,10 @@
-package util
+package config
 
 import (
 	"log"
 
-	clientv3 "go.etcd.io/etcd/client/v3"
-
 	"github.com/spf13/viper"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 type Config struct {
