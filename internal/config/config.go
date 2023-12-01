@@ -1,10 +1,16 @@
 package config
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/spf13/viper"
 	clientv3 "go.etcd.io/etcd/client/v3"
+)
+
+const (
+	keepAlivedPrefix = "/keepalived/"
 )
 
 type Config struct {
@@ -38,9 +44,8 @@ type vrrpInstance struct {
 	HaveResidualInfo bool
 }
 
-func (i vrrpInstance) GenerateKV() (string, string) {
-
-	return "", ""
+func (v *vrrpInstance) GenerateKV() (string, string) {
+	return fmt.Sprintf("%s%s/%s", keepAlivedPrefix, v.virtualIP, v.localIP), strconv.Itoa(v.priority)
 }
 
 type GlobalConfig struct {
