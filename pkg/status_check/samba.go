@@ -3,7 +3,7 @@ package status_check
 import (
 	"time"
 
-	"split_brain_check/pkg/metrics"
+	"system-usability-detection/pkg/metrics"
 )
 
 var _ StatusInterface = (*SambaImpl)(nil)

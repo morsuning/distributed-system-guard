@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	"split_brain_check/internal/config"
+	"system-usability-detection/internal/config"
 )
 
 func main() {

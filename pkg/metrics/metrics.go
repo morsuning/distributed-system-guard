@@ -1,13 +1,18 @@
 package metrics
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/client_golang/prometheus/push"
+	"github.com/prometheus/common/log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 )
 
-const nameSpace = "split_brain_check"
+const nameSpace = "system-usability-detection"
 
 var (
 	Gather = prometheus.NewRegistry()
@@ -36,13 +41,13 @@ var (
 			Help:      "Counter of nas updates.",
 		}, []string{"type"}) // nas检测计数counter
 
-	UbiscaleCheckCounter = prometheus.NewCounterVec(
+	ServiceCheckCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Namespace: nameSpace,
-			Subsystem: "ubiscale",
-			Name:      "ubiscale_check_updates",
-			Help:      "Counter of ubiscale updates.",
-		}, []string{"type"}) // ubiscale检测计数counter
+			Subsystem: "Service",
+			Name:      "Service_check_updates",
+			Help:      "Counter of Service updates.",
+		}, []string{"type"}) // Service检测计数counter
 
 	NfsCheckCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -81,7 +86,7 @@ func init() {
 	Gather.MustRegister(CacheCheckCounter)
 	Gather.MustRegister(FrontInterfaceCheckCounter)
 	Gather.MustRegister(NasCheckCounter)
-	Gather.MustRegister(UbiscaleCheckCounter)
+	Gather.MustRegister(ServiceCheckCounter)
 	Gather.MustRegister(NfsCheckCounter)
 	Gather.MustRegister(ExecuteTimeOutGauge)
 	Gather.MustRegister(RequestHistogram)
@@ -91,7 +96,7 @@ func init() {
 
 }
 
-// 循环推送pushgateway
+// LoopPushingMetric 循环推送pushgateway
 func LoopPushingMetric(name, addr string, intervalSeconds int) {
 	if addr == "" || intervalSeconds == 0 {
 		return
@@ -117,7 +122,7 @@ func LoopPushingMetric(name, addr string, intervalSeconds int) {
 	}
 }
 
-// 开启指标服务
+// StartMetricsServer 开启指标服务
 func StartMetricsServer(address string) {
 	if address == "" {
 		return

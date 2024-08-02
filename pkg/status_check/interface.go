@@ -14,7 +14,7 @@ type StatusAction struct {
 	Extra  interface{} // 预留字段
 }
 
-// 状态检查接口
+// StatusInterface 状态检查接口
 type StatusInterface interface {
 	CheckStatus() StatusAction
 	Name() string
@@ -38,7 +38,7 @@ var globalMapping = map[string]StatusInterface{
 	"nas":         &NasImpl{Address: "http://localhost:9999/api/status"}, // nas服务健康状态检测
 	"nfs":         &NFSImpl{},                                            // nfsd服务健康状态检测
 	"power_cache": &PowerCacheImpl{MountPoint: "/var/powercache"},        // powercache服务健康状态检测
-	"ubiscale":    &UbiscaleImpl{},                                       // ubiscale服务健康状态检测
+	"service":     &serviceImpl{},                                        // service服务健康状态检测
 	"samba":       &SambaImpl{},                                          // smbd服务健康状态检测
 }
 

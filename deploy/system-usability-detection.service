@@ -1,15 +1,15 @@
 [Unit]
-Description=split_brain_check
+Description=system usability detection
 Wants=network-online.target
 After=network-online.target
-AssertFileIsExecutable=/opt/bin/split_brain_check
+AssertFileIsExecutable=/opt/bin/system-usability-detection
 StartLimitBurst=10
 
 [Service]
 User=root
 Group=root
 ExecStartPre=/bin/bash
-ExecStart=/opt/bin/split_brain_check
+ExecStart=/opt/bin/system-usability-detection
 
 # Let systemd restart this service always
 Restart=always

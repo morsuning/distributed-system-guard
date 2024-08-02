@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"split_brain_check/internal/config"
-	"split_brain_check/internal/util"
+	"system-usability-detection/internal/config"
+	"system-usability-detection/internal/util"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )

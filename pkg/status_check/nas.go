@@ -1,15 +1,16 @@
 package status_check
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
-	"split_brain_check/pkg/metrics"
+	"system-usability-detection/pkg/metrics"
 )
 
 var _ StatusInterface = (*NasImpl)(nil)
 
-// nas服务检测
+// NasImpl nas服务检测
 type NasImpl struct {
 	Address string
 }
