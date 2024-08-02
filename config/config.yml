@@ -1,0 +1,56 @@
+interface: enp101s0f1
+etcd:
+  - 10.1.1.11:2379
+  - 10.1.1.12:2379
+  - 10.1.1.13:2379
+dial: 2
+ttl: 2
+instances:
+  -
+    name: node1
+    vips:
+      -
+        priority: 100
+        vip: 10.1.1.133
+      -
+        priority: 90
+        vip: 10.1.1.134
+      -
+        priority: 80
+        vip: 10.1.1.135
+    check:  ## nfs,nas,power_cache,oss,samba
+      - nas
+      - power_cache
+      - oss
+  -
+    name: node2
+    vips:
+      -
+        priority: 90
+        vip: 10.1.1.133
+      -
+        priority: 100
+        vip: 10.1.1.134
+      -
+        priority: 90
+        vip: 10.1.1.135
+    check:
+      - nas
+      - power_cache
+      - oss
+  -
+    name: node3
+    vips:
+      -
+        priority: 80
+        vip: 10.1.1.133
+      -
+        priority: 80
+        vip: 10.1.1.134
+      -
+        priority: 100
+        vip: 10.1.1.135
+    check:
+      - nas
+      - power_cache
+      - oss
