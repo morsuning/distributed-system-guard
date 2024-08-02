@@ -4,6 +4,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"system-usability-detection/internal/config"
+	"system-usability-detection/internal/util"
+	"system-usability-detection/pkg/metrics"
 	"time"
 )
 
@@ -20,25 +23,25 @@ type StatusInterface interface {
 	Name() string
 }
 
-// 默认检测模块
-var defaultCheckModule = []StatusInterface{
+// DefaultCheckModule 默认检测模块
+var DefaultCheckModule = []StatusInterface{
 	&FrontInterface{},
 }
 
 func GetAllSupportType() []string {
 	var support []string
-	for k := range globalMapping {
+	for k := range GlobalMapping {
 		support = append(support, k)
 	}
 	return support
 }
 
-// 每新增一个检测模块,需要在这里添加映射
-var globalMapping = map[string]StatusInterface{
+// GlobalMapping 每新增一个检测模块,需要在这里添加映射
+var GlobalMapping = map[string]StatusInterface{
 	"nas":         &NasImpl{Address: "http://localhost:9999/api/status"}, // nas服务健康状态检测
 	"nfs":         &NFSImpl{},                                            // nfsd服务健康状态检测
 	"power_cache": &PowerCacheImpl{MountPoint: "/var/powercache"},        // powercache服务健康状态检测
-	"service":     &serviceImpl{},                                        // service服务健康状态检测
+	"service":     &OSSImpl{},                                            // service服务健康状态检测
 	"samba":       &SambaImpl{},                                          // smbd服务健康状态检测
 }
 
@@ -46,7 +49,7 @@ var globalMapping = map[string]StatusInterface{
 func getValidCheck(a []string) []string {
 	var ret []string
 	for _, s := range a {
-		if _, ok := globalMapping[s]; ok {
+		if _, ok := GlobalMapping[s]; ok {
 			ret = append(ret, s)
 		}
 	}
@@ -56,12 +59,12 @@ func getValidCheck(a []string) []string {
 // 编译检查
 var _ StatusInterface = (*KeepAlivedCheckImpl)(nil)
 
-// 检查keepalived服务状态的实现
+// KeepAlivedCheckImpl 检查keepalived服务状态的实现
 type KeepAlivedCheckImpl struct {
 	PidFile string
 }
 
-// 添加聚合方式
+// NewKeepAlivedCheckImpl 添加聚合方式
 func NewKeepAlivedCheckImpl(pidFile string) StatusInterface {
 	if pidFile == "" {
 		pidFile = "/var/run/keepalived.pid"
@@ -71,7 +74,7 @@ func NewKeepAlivedCheckImpl(pidFile string) StatusInterface {
 	}
 }
 
-// 那个模块的检测机制,这里对应模块名称
+// Name 那个模块的检测机制,这里对应模块名称
 func (k *KeepAlivedCheckImpl) Name() string {
 	return "keepalived"
 }
@@ -99,4 +102,33 @@ func (k *KeepAlivedCheckImpl) CheckStatus() StatusAction {
 	}
 	sa.Status = true
 	return sa
+}
+
+type FrontInterface struct{}
+
+func (f *FrontInterface) Name() string {
+	return "front_interface"
+}
+
+func (f *FrontInterface) CheckStatus() StatusAction {
+	now := time.Now()
+	defer func() {
+		used := time.Since(now)
+		util.Logger.Info("check %s used:%v", f.Name(), used)
+	}()
+	metrics.FrontInterfaceCheckCounter.WithLabelValues("total").Inc()
+	sa := StatusAction{
+		Time:   time.Now(),
+		Name:   f.Name(),
+		Status: false,
+	}
+	_, err := util.IsInterfaceDown(config.GlobalConfigInstance.VrrpNetInterface)
+	if err != nil {
+		metrics.FrontInterfaceCheckCounter.WithLabelValues("failed").Inc()
+		sa.Extra = err.Error()
+		return sa
+	}
+	sa.Status = true
+	return sa
+
 }

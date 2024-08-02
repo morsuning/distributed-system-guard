@@ -5,10 +5,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/client_golang/prometheus/push"
-	"github.com/prometheus/common/log"
+	"log"
 	"net/http"
 	"os"
 	"strings"
+	"system-usability-detection/internal/util"
 	"time"
 )
 
@@ -96,7 +97,7 @@ func init() {
 
 }
 
-// LoopPushingMetric 循环推送pushgateway
+// LoopPushingMetric 循环推送push gateway
 func LoopPushingMetric(name, addr string, intervalSeconds int) {
 	if addr == "" || intervalSeconds == 0 {
 		return
@@ -108,12 +109,12 @@ func LoopPushingMetric(name, addr string, intervalSeconds int) {
 	} else {
 		instance = hostname
 	}
-	logger.Infof("%s server sends metrics to %s every %d seconds", name, addr, intervalSeconds)
+	util.Logger.Info("%s server sends metrics to %s every %d seconds", name, addr, intervalSeconds)
 	pusher := push.New(addr, name).Gatherer(Gather).Grouping("instance", instance)
 	for {
 		err := pusher.Push()
 		if err != nil && !strings.HasPrefix(err.Error(), "unexpected status code 200") {
-			logger.Infof("could not push metrics to prometheus push gateway %s: %v", addr, err)
+			util.Logger.Info("could not push metrics to prometheus push gateway %s: %v", addr, err)
 		}
 		if intervalSeconds <= 0 {
 			intervalSeconds = 15

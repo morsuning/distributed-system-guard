@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"system-usability-detection/pkg/status_check"
 
 	"github.com/spf13/viper"
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -36,7 +37,7 @@ type vrrpInstances struct {
 
 type vrrpInstance struct {
 	priority           int
-	virtualIP, localIP string
+	virtualIP, LocalIP string
 	// etcd leaseID
 	LeaseID     clientv3.LeaseID
 	KeepAliveCh <-chan *clientv3.LeaseKeepAliveResponse
@@ -45,7 +46,7 @@ type vrrpInstance struct {
 }
 
 func (v *vrrpInstance) GenerateKV() (string, string) {
-	return fmt.Sprintf("%s%s/%s", keepAlivedPrefix, v.virtualIP, v.localIP), strconv.Itoa(v.priority)
+	return fmt.Sprintf("%s%s/%s", keepAlivedPrefix, v.virtualIP, v.LocalIP), strconv.Itoa(v.priority)
 }
 
 type GlobalConfig struct {
@@ -66,5 +67,13 @@ func ParseConfig(path string) {
 	if err := v.Unmarshal(&config); err != nil {
 		log.Panicf("fatal error unmarshal config file: %w", err)
 	}
+}
 
+func GetCheckMode() []status_check.StatusInterface {
+	var si []status_check.StatusInterface
+	si = append(si, status_check.DefaultCheckModule...)
+	for _, ele := range GlobalConfigInstance.VrrpInstances.checks {
+		si = append(si, status_check.GlobalMapping[ele])
+	}
+	return si
 }
